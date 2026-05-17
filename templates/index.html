@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Jelli</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- ===== SCREEN 1: WELCOME ===== -->
+    <div class="screen welcome-screen active" id="welcomeScreen">
+        <div class="welcome-content">
+            <h1 class="title">Jelli</h1>
+
+            <div class="logo-wrapper">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Jelli logo" class="logo" id="logoImg">
+            </div>
+
+            <div class="search-wrapper">
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search-bar"
+                    placeholder="Songs or Artists"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                >
+            </div>
+
+            <div class="lang-wrapper">
+                <label for="langSelect" class="lang-label">Translate to:</label>
+                <select id="langSelect" class="lang-select">
+                    {% for code, name in languages.items() %}
+                    <option value="{{ code }}" {% if code == "en" %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="suggestions-wrapper" id="suggestionsWrapper">
+                <ul class="suggestions-list" id="suggestionsList"></ul>
+            </div>
+
+            <p class="status" id="welcomeStatus"></p>
+        </div>
+    </div>
+
+    <!-- ===== SCREEN 2: TRANSLATION ===== -->
+    <div class="screen translation-screen" id="translationScreen">
+        <div class="top-bar">
+            <button class="back-btn" id="backBtn" aria-label="Go back">←</button>
+            <div class="song-info" id="songInfo"></div>
+        </div>
+
+        <div class="lyrics-container">
+            <div class="lyrics-column">
+                <h3 class="column-title">Original Lyrics</h3>
+                <div class="lyrics-box original-box" id="originalLyrics">
+                    <div class="loader">Loading...</div>
+                </div>
+            </div>
+            <div class="lyrics-column">
+                <h3 class="column-title translation-title">Translation</h3>
+                <div class="lyrics-box translation-box" id="translatedLyrics">
+                    <div class="loader">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <p class="status" id="transStatus"></p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
