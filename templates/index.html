@@ -15,7 +15,7 @@
             <h1 class="title">Jelli</h1>
 
             <div class="logo-wrapper" id="logoWrapper">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Jelli logo" class="logo" id="logoImg">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Jelli logo" class="logo">
             </div>
             <p class="logo-hint">tap logo for history</p>
 
@@ -33,7 +33,7 @@
             </div>
 
             <div class="lang-wrapper">
-                <label for="langSelect" class="lang-label">Translate to:</label>
+                <label for="langSelect" class="lang-label">Default language:</label>
                 <select id="langSelect" class="lang-select">
                     {% for code, name in languages.items() %}
                     <option value="{{ code }}" {% if code == "en" %}selected{% endif %}>{{ name }}</option>
@@ -73,7 +73,6 @@
 
         <div class="bottom-bar">
             <p class="status" id="transStatus"></p>
-            <p class="word-hint">💡 Tap any word to see its translation</p>
         </div>
     </div>
 
@@ -90,6 +89,20 @@
             <div class="history-empty" id="historyEmpty">
                 <p>No songs translated yet.</p>
                 <p class="empty-sub">Go back and search for a song!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LANGUAGE PICKER MODAL ===== -->
+    <div class="modal-overlay" id="languageModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+            <h3 class="modal-title">Choose translation language</h3>
+            <p class="modal-subtitle" id="modalSongInfo"></p>
+            <div class="modal-languages" id="modalLanguages">
+                {% for code, name in languages.items() %}
+                <button class="modal-lang-btn" data-lang="{{ code }}">{{ name }}</button>
+                {% endfor %}
             </div>
         </div>
     </div>
