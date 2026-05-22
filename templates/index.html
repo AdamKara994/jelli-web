@@ -6,11 +6,8 @@
     <meta name="theme-color" content="#000000">
     <title>Jelli</title>
 
-    <!-- Favicon (browser tab icon) -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
-
-    <!-- Apple touch icon (for iPhone home screen) -->
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.png') }}">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -40,14 +37,12 @@
                 >
             </div>
 
-            <div class="lang-wrapper">
-                <label for="langSelect" class="lang-label">Default language:</label>
-                <select id="langSelect" class="lang-select">
-                    {% for code, name in languages.items() %}
-                    <option value="{{ code }}" {% if code == "en" %}selected{% endif %}>{{ name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <!-- Hidden default language for code compatibility -->
+            <select id="langSelect" style="display:none" aria-hidden="true">
+                {% for code, name in languages.items() %}
+                <option value="{{ code }}" {% if code == "en" %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
 
             <div class="suggestions-wrapper" id="suggestionsWrapper">
                 <ul class="suggestions-list" id="suggestionsList"></ul>

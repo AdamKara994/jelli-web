@@ -1,6 +1,5 @@
 // ===== JELLI WEB - FRONTEND LOGIC =====
 
-// Wait for DOM to be ready before running anything
 document.addEventListener("DOMContentLoaded", () => {
     initJelli();
 });
@@ -11,7 +10,6 @@ function initJelli() {
     const translationScreen = document.getElementById("translationScreen");
     const historyScreen = document.getElementById("historyScreen");
     const searchInput = document.getElementById("searchInput");
-    const langSelect = document.getElementById("langSelect");
     const suggestionsWrapper = document.getElementById("suggestionsWrapper");
     const suggestionsList = document.getElementById("suggestionsList");
     const welcomeStatus = document.getElementById("welcomeStatus");
@@ -28,13 +26,28 @@ function initJelli() {
     const languageModal = document.getElementById("languageModal");
     const modalClose = document.getElementById("modalClose");
     const modalSongInfo = document.getElementById("modalSongInfo");
-    const modalLanguages = document.getElementById("modalLanguages");
 
     let searchTimeout = null;
     let currentSearchQuery = "";
-    let pendingSong = null; // Song waiting for language selection
+    let pendingSong = null;
+    let lastSearchResults = []; // Cache last search results to restore them
 
-    // ===== HISTORY (localStorage) =====
+    // Last used language - we save this to localStorage so the user's preference persists
+    const LAST_LANG_KEY = "jelli_last_lang";
+    function getLastUsedLang() {
+        try {
+            return localStorage.getItem(LAST_LANG_KEY) || "en";
+        } catch (e) {
+            return "en";
+        }
+    }
+    function setLastUsedLang(lang) {
+        try {
+            localStorage.setItem(LAST_LANG_KEY, lang);
+        } catch (e) {}
+    }
+
+    // ===== HISTORY =====
     const HISTORY_KEY = "jelli_history";
     const MAX_HISTORY = 50;
     const LANGUAGE_NAMES = {
@@ -114,7 +127,6 @@ function initJelli() {
             li.querySelector(".history-time").textContent = entry.timestamp;
 
             li.addEventListener("click", () => {
-                // Translate again with the same language - no modal
                 doTranslation(
                     { id: entry.id, title: entry.title, artist: entry.artist },
                     entry.lang_code
@@ -131,6 +143,10 @@ function initJelli() {
         translationScreen.classList.remove("active");
         historyScreen.classList.remove("active");
         welcomeScreen.classList.add("active");
+        // Clear search input and suggestions when returning home
+        searchInput.value = "";
+        lastSearchResults = [];
+        hideSuggestions();
     }
 
     function showTranslationScreen() {
@@ -163,6 +179,7 @@ function initJelli() {
         if (searchTimeout) clearTimeout(searchTimeout);
         if (query.length < 1) {
             hideSuggestions();
+            lastSearchResults = [];
             return;
         }
         searchTimeout = setTimeout(() => performSearch(query), 300);
@@ -193,7 +210,8 @@ function initJelli() {
                 return;
             }
 
-            displaySuggestions(data.results || []);
+            lastSearchResults = data.results || [];
+            displaySuggestions(lastSearchResults);
         } catch (err) {
             welcomeStatus.textContent = `Network error. Try again.`;
             hideSuggestions();
@@ -237,11 +255,11 @@ function initJelli() {
     function onSongSelected(song) {
         pendingSong = song;
         modalSongInfo.textContent = `${song.title} — ${song.artist}`;
-        // Pre-highlight the default language
-        const defaultLang = langSelect.value;
+        // Highlight the user's last used language as a hint
+        const lastLang = getLastUsedLang();
         document.querySelectorAll(".modal-lang-btn").forEach((btn) => {
             btn.classList.remove("default-selected");
-            if (btn.dataset.lang === defaultLang) {
+            if (btn.dataset.lang === lastLang) {
                 btn.classList.add("default-selected");
             }
         });
@@ -268,6 +286,7 @@ function initJelli() {
             const langCode = btn.dataset.lang;
             if (!pendingSong) return;
             const song = pendingSong;
+            setLastUsedLang(langCode);  // remember choice
             hideLanguageModal();
             doTranslation(song, langCode);
         });
@@ -396,7 +415,6 @@ function initJelli() {
             }
             translationEl.classList.remove("popup-loading");
 
-            // Auto-close after 5 seconds
             setTimeout(() => {
                 if (currentPopup === popup) closePopup();
             }, 5000);
@@ -462,7 +480,6 @@ function initJelli() {
         }
     }
 
-    // Close popup on outside click
     document.addEventListener("click", (e) => {
         if (currentPopup &&
             !currentPopup.contains(e.target) &&
@@ -471,12 +488,10 @@ function initJelli() {
         }
     });
 
-    // Close popup on scroll inside lyrics boxes
     [originalLyrics, translatedLyrics].forEach((box) => {
         if (box) box.addEventListener("scroll", closePopup);
     });
 
-    // Hide suggestions on outside click
     document.addEventListener("click", (e) => {
         if (!suggestionsWrapper.contains(e.target) && e.target !== searchInput) {
             if (!searchInput.value.trim()) {
